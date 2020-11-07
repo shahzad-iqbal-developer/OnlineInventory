@@ -4,11 +4,15 @@ import com.OnlineInventory.Order.Model.*;
 import com.OnlineInventory.Order.Repository.CustomerDetailRepository;
 import com.OnlineInventory.Order.Repository.ItemRepository;
 import com.OnlineInventory.Order.Repository.OrderHistoryRepository;
+import com.OnlineInventory.Order.Response.ItemDetails;
+import com.OnlineInventory.Order.Response.OrderSearchResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+//import com.OnlineInventory.Orde
+//import com.OnlineInventory.Order.Response.OrderSearchResponse;
 
 @Service
 public class BeanUtils {
@@ -46,6 +50,9 @@ public class BeanUtils {
         orderAddressDetail.setShipToCity(shippingAddress.getCity());
         orderAddressDetail.setShipToCountry(shippingAddress.getCountry());
         orderAddressDetail.setShipToState(shippingAddress.getState());
+        orderAddressDetail.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
+        orderAddressDetail.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
+
         orderAddressDetail.setOrder(order);
         orderAddressDetail.setCreatedDate(new Timestamp(now));
         orderAddressDetail.setLastUpdated(new Timestamp(now));
@@ -80,6 +87,8 @@ public class BeanUtils {
             orderDetail.setItemPrice(orderItem.getPrice());
             orderDetail.setCreateDate(new Timestamp(now));
             orderDetail.setLastUpdate(new Timestamp(now));
+            orderDetail.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().toString());
+            orderDetail.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
             orderDetail.setDiscountAmount(orderDTO.getCouponDetail().getDiscountAmt());
             orderDetail.setDiscountCode(orderDTO.getCouponDetail().getCouponName());
             orderDetail.setDiscountType(orderDTO.getCouponDetail().getDiscountType());
@@ -121,6 +130,8 @@ public class BeanUtils {
         paymentDetails.setAccountNumber(paymentDetailDTO.getAccountNo());
         paymentDetails.setIfscCode(paymentDetailDTO.getIfscCode());
         paymentDetails.setCardNumber(paymentDetailDTO.getCardNumber());
+        paymentDetails.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
+        paymentDetails.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
         paymentDetails.setCardExpiry(paymentDetailDTO.getCardExpiryDate());
         paymentDetails.setOrderTotalAmount(paymentDetailDTO.getTotalPrice());
         paymentDetails.setCardFirstName(paymentDetailDTO.getCardUserName().split(" ")[0]);
@@ -137,11 +148,83 @@ public class BeanUtils {
         orderHistory.setOrder(order);
         orderHistory.setItem(orderItem);
         orderHistory.setCreatedDate(new Timestamp(now));
+        orderHistory.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().toString());
+        orderHistory.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().toString());
 //        orderHistory.setUpdatedBy(new Timestamp(now));
         orderHistory.setNotificationSent(orderDTO.getNotificationId()!=null);
         orderHistory.setLastUpdated(new Timestamp(now));
         orderHistory.setStatusDate(new Timestamp(now));
 //        orderHistoryRepository.save(orderHistory);
         return orderHistory;
+    }
+
+    public ArrayList populateOrderListDetail(ArrayList orderList) {
+        ArrayList odList = new ArrayList();
+
+        for(int i=0; i<orderList.size();i++) {
+            OrderSearchResponse osr = new OrderSearchResponse();
+            Order order = (Order)orderList.get(i);
+
+            osr.setOrder_id(order.getOrder_id());
+            osr.setOrderTotalAmount(order.getOrderTotalAmount());
+            osr.setOrderStatus(order.getOrderStatus());
+            osr.setCreateDate(order.getCreateDate());
+            osr.setCreatedBy(order.getCreatedBy());
+            osr.setDiscountAmount(order.getDiscountAmount());
+            osr.setDiscountCode(order.getDiscountCode());
+            osr.setDiscountType(order.getDiscountType());
+            osr.setEmail(order.getEmail());
+            //osr.setItemDetailList(itemDetailList);
+            osr.setLastUpdate(order.getLastUpdate());
+            osr.setNotificationType(order.getNotificationType());
+            osr.setOrderBaseAmount(order.getOrderBaseAmount());
+            osr.setPaymentStatus(order.getPaymentStatus());
+            osr.setPhone(order.getPhone());
+            osr.setShippingAmount(order.getShippingAmount());
+            osr.setShippingId(order.getShippingId());
+            osr.setShippingMethod(order.getShippingMethod());
+            osr.setUpdatedBy(order.getUpdatedBy());
+            osr.setUserType(order.getUserType());
+
+            ArrayList itemList = new ArrayList();
+            for(int j=0;j< order.getOrderDetailList().size();j++) {
+                OrderDetail orderDetail = (OrderDetail) order.getOrderDetailList().get(j);
+                ItemDetails itemDetail = new ItemDetails();
+
+                itemDetail.setItemStatus(orderDetail.getItemStatus());
+                itemDetail.setItemTotalAmount(orderDetail.getItemTotalAmount());;
+                itemDetail.setQuantity(orderDetail.getQuantity());
+                itemDetail.setItemPrice(orderDetail.getItemPrice());
+                itemDetail.setTaxAmount(orderDetail.getTaxAmount());
+                itemDetail.setDiscountType(orderDetail.getDiscountType());
+                itemDetail.setDiscountCode(orderDetail.getDiscountCode());
+                itemDetail.setDiscountAmount(orderDetail.getDiscountAmount());
+                itemDetail.setItemComment(orderDetail.getItemComment());
+                itemDetail.setCreatedBy(orderDetail.getCreatedBy());
+                itemDetail.setCreateDate(orderDetail.getCreateDate());
+                itemDetail.setUpdatedBy(orderDetail.getUpdatedBy());
+                itemDetail.setLastUpdate(orderDetail.getLastUpdate());
+
+                itemDetail.setDescription(orderDetail.getItem().getDescription());
+                itemDetail.setItemColor(orderDetail.getItem().getItemColor());
+                itemDetail.setItemId(orderDetail.getItem().getId());
+                itemDetail.setItemName(orderDetail.getItem().getName());
+                itemDetail.setItemSize(orderDetail.getItem().getItemSize());
+                itemDetail.setLongName(orderDetail.getItem().getLongName());
+                itemDetail.setPrice(orderDetail.getItem().getPrice());
+                itemDetail.setSku(orderDetail.getItem().getSku());
+
+                itemDetail.setProductId(orderDetail.getItem().getProduct().getProduct_id());
+                itemDetail.setProductName(orderDetail.getItem().getProduct().getName());
+                itemDetail.setProductLongName(orderDetail.getItem().getProduct().getLong_name());
+                itemDetail.setProdDescription(orderDetail.getItem().getProduct().getDescription());
+                itemList.add(itemDetail);
+            }
+
+            osr.setItemDetailList(itemList);
+            odList.add(osr);
+        }
+
+        return odList;
     }
 }

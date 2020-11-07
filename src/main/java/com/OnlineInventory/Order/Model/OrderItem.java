@@ -65,10 +65,15 @@ public class OrderItem
     @OneToMany(mappedBy = "item")
     List<OrderHistory> orderHistory;
 
+    @JsonIgnoreProperties("product")
+    @OneToOne
+    @JoinColumn(name = "product_id" ,nullable=false)
+    Product product;
+
     public OrderItem( String name, Integer productId, String sku, Long busyItemCode, String longName,
                      String description, Integer quantity, Double price,
                      String itemColor, String itemSize, Integer updatedBy,
-                     Timestamp lastUpdated, List<OrderDetail> orderDetails, List<OrderHistory> orderHistory,Double taxRate
+                     Timestamp lastUpdated, List<OrderDetail> orderDetails, List<OrderHistory> orderHistory,Double taxRate,Product product
     ) {
 
         this.name = name;
@@ -86,9 +91,19 @@ public class OrderItem
         this.orderDetails = orderDetails;
         this.orderHistory = orderHistory;
         this.taxRate=taxRate;
+
+        this.product = product;
     }
 
     public OrderItem() {
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 
     public Long getId() {

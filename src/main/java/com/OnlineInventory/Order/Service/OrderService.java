@@ -3,6 +3,7 @@ package com.OnlineInventory.Order.Service;
 import com.OnlineInventory.Order.Commons.ApiResponse;
 import com.OnlineInventory.Order.Commons.BeanUtils;
 import com.OnlineInventory.Order.DTO.BillingAddressDTO;
+import com.OnlineInventory.Order.DTO.CustomerAddressDTO;
 import com.OnlineInventory.Order.DTO.OrderDTO;
 import com.OnlineInventory.Order.DTO.PaymentDetailDTO;
 import com.OnlineInventory.Order.Model.*;
@@ -17,10 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class OrderService {
@@ -39,6 +37,9 @@ public class OrderService {
 
     @Autowired
     PaymentRepository paymentRepository;
+
+    @Autowired
+    CustomerAddressRepository custAddRepository;
 
 //    @Autowired
 //    OrderAddressDetailRepository orderAddressDetailRepository;
@@ -67,6 +68,7 @@ public class OrderService {
             order.setOrderTotalAmount(orderDTO.getPaymentDetail().getTotalPrice());
         order.setOrderBaseAmount(orderDTO.getOrderTotal());
         order.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
+        order.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
         order.setDiscountAmount(orderDTO.getCouponDetail().getDiscountAmt());
         order.setPhone(orderDTO.getCustomerDetail().getPhone());
         order.setShippingId(orderDTO.getShippingMethod().toString());
@@ -118,6 +120,115 @@ public class OrderService {
 		
 	}
 
+    public ResponseEntity<Object> getOrderListID(int createdBy) {
+        logger.info("getting order by id"+createdBy);
+        Optional<ArrayList> orderList = orderRepository.findAllByCreatedBy(createdBy);
+        if(orderList.isPresent()) {
+            return ResponseEntity.ok(orderList.get()); //new ApiResponse<Order>(order,"SUCCESS",new Timestamp(System.currentTimeMillis()));
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);//new ApiResponse<Order>(null,"Order Id doesn't exsist",new Timestamp(System.currentTimeMillis()));
+
+    }
+
+
+
+    public ResponseEntity<Object> getOrderListForAdmin(Date startDate, Date endDate) {
+        //logger.info("getting order by id"+createdBy);
+        System.out.println("in side admin");
+        Date date = new Date();
+        Timestamp t1  = new Timestamp(startDate.getTime());
+        System.out.println("Date t1= "+ t1  +"   || "+new Timestamp(date.getTime()));
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -60);
+        Timestamp t2  = new Timestamp(endDate.getTime());
+        System.out.println("Date t2= "+ t2 +"||" + new Timestamp(cal.getTime().getTime()));
+
+
+        Optional<ArrayList> orderList = orderRepository.findAllByCreateDateBetween(t1, t2);
+        if(orderList.isPresent()) {
+            return ResponseEntity.ok(orderList.get()); //new ApiResponse<Order>(order,"SUCCESS",new Timestamp(System.currentTimeMillis()));
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);//new ApiResponse<Order>(null,"Order Id doesn't exsist",new Timestamp(System.currentTimeMillis()));
+
+    }
+
+    public ResponseEntity<Object> getOrderList(int createdBy, Date startDate, Date endDate) {
+        logger.info("getting order by id"+createdBy);
+        System.out.println("in side non ad");
+        Date date = new Date();
+        Timestamp t1  = new Timestamp(startDate.getTime());
+        System.out.println("Date t1= "+ t1  +"   || "+new Timestamp(date.getTime()));
+
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -60);
+        Timestamp t2  = new Timestamp(endDate.getTime());
+        System.out.println("Date t2= "+ t2 +"||" + new Timestamp(cal.getTime().getTime()));
+
+
+        ArrayList orderList = orderRepository.findAllByCreatedByAndCreateDateBetween(createdBy, t1, t2);
+
+        ArrayList orderListResponse = beanUtils.populateOrderListDetail(orderList);
+        if(orderListResponse.size()>0) {
+            return ResponseEntity.ok(orderListResponse); //new ApiResponse<Order>(order,"SUCCESS",new Timestamp(System.currentTimeMillis()));
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);//new ApiResponse<Order>(null,"Order Id doesn't exsist",new Timestamp(System.currentTimeMillis()));
+
+    }
+
+
+    public ResponseEntity<Object> postCustomerAddress(CustomerAddressDTO custAddDTO){
+        Long now =System.currentTimeMillis();
+        Logger logger = LoggerFactory.getLogger(OrderService.class);
+        logger.info("Posting Application ....");
+        CustomerAddress custAdd = new CustomerAddress();
+
+        custAdd.setAddressLine1(custAddDTO.getAddressLine1());
+        custAdd.setAddressLine2(custAddDTO.getAddressLine2());
+        custAdd.setCountry(custAddDTO.getCountry());
+        custAdd.setFirstName(custAddDTO.getFirstName());
+        custAdd.setMiddleName(custAddDTO.getMiddleName());
+        custAdd.setLastName(custAddDTO.getLastName());
+        custAdd.setBilling(custAddDTO.isBilling());
+        custAdd.setCellNo(custAddDTO.getCellNo());
+        custAdd.setCity(custAddDTO.getCity());
+        custAdd.setFaxNo(custAddDTO.getFaxNo());
+        custAdd.setLastUpdated(new Timestamp(now));
+        custAdd.setMailing(custAddDTO.isMailing());
+        custAdd.setPhone(custAddDTO.getPhone());
+        custAdd.setPrimary(custAddDTO.isPrimary());
+        custAdd.setState(custAddDTO.getState());
+        custAdd.setUpdatedBy(custAddDTO.getUpdatedBy());
+        custAdd.setZipCode(custAddDTO.getZipCode());
+        custAdd.setCreatedBy(custAddDTO.getCreatedBy());
+        custAdd.setCreatedDate(new Timestamp(now));
+
+        try
+        {
+            custAddRepository.save(custAdd);
+            logger.info("{Id: "+custAdd.getAddress_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
+            return ResponseEntity.ok(custAdd.getAddress_id());
+        }
+        catch (Exception e)
+        {
+            logger.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    public ResponseEntity<Object> getCustomerAddress(int createdBy) {
+        logger.info("getting addresses by id - "+createdBy);
+        try {
+            ArrayList addList = custAddRepository.findAllByCreatedBy(createdBy);
+            if(addList.size()>0) {
+                return ResponseEntity.ok(addList);
+            }
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+        }catch(Exception e) {
+            logger.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 
 
 
