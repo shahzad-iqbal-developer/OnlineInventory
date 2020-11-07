@@ -8,14 +8,15 @@
 		<version>2.3.3.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.example</groupId>
-	<artifactId>demo</artifactId>
+	<groupId>com.inventory</groupId>
+	<artifactId>order</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Order</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Order project for Spring Boot</description>
 
 	<properties>
 		<java.version>1.8</java.version>
+		<modelmapper.version>2.3.3</modelmapper.version>
 	</properties>
 
 	<dependencies>
@@ -89,6 +90,20 @@
 		   <groupId>io.springfox</groupId>
 		   <artifactId>springfox-swagger-ui</artifactId>
 		   <version>2.7.0</version>
+		</dependency>
+
+		<!--Model mapper -->
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>${modelmapper.version}</version>
+		</dependency>
+
+		<!--Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 	</dependencies>
