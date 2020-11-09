@@ -21,8 +21,8 @@ public class OrderItem
     @Column(name = "name")
     private  String name;
 
-    @Column(name = "product_id")
-    private Integer productId;
+//    @Column(name = "product_id")
+//    private Integer productId;
 
     @Column(name = "sku")
     private String sku;
@@ -77,7 +77,7 @@ public class OrderItem
     ) {
 
         this.name = name;
-        this.productId = productId;
+//        this.productId = productId;
         this.sku = sku;
         this.busyItemCode = busyItemCode;
         this.longName = longName;
@@ -122,13 +122,13 @@ public class OrderItem
         this.name = name;
     }
 
-    public Integer getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Integer productId) {
-        this.productId = productId;
-    }
+//    public Integer getProductId() {
+//        return productId;
+//    }
+//
+//    public void setProductId(Integer productId) {
+//        this.productId = productId;
+//    }
 
     public String getSku() {
         return sku;
