@@ -20,8 +20,8 @@ public class ConversationUtil {
     /**
      * This method is used to convert DTO to Entity.
      *
-     * @param dtoObject    source Object which will be convert into Entity.
-     * @param entityObject target Object.
+     * @param sourceDto    source Object which will be convert into Entity.
+     * @param destinationEntity target Object.
      * @param <T>
      * @return Entity Object.
      */

@@ -2,7 +2,7 @@ package com.inventory.order.service;
 
 import com.inventory.order.dto.CustomerAddressDTO;
 import com.inventory.order.repository.CustomerAddressRepository;
-import com.inventory.order.infrastructure.common.BeanUtils;
+import com.inventory.order.infrastructure.util.OrderConversionUtil;
 import com.inventory.order.dto.OrderDTO;
 import com.inventory.order.model.*;
 import com.inventory.order.repository.*;
@@ -10,7 +10,6 @@ import com.inventory.order.repository.*;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -28,51 +27,60 @@ import java.util.*;
 @Slf4j
 public class OrderServiceImpl implements OrderService{
 
-//    @Autowired
-    ItemRepository itemRepository;
-
-//    @Autowired
-    OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
 
     //TODO: It should call his own repository only (Best practice), if we want to do different task we should call their service
-//    @Autowired
-    OrderDetailRepository orderDetailRepository;
 
-//    @Autowired
-    OrderHistoryRepository orderHistoryRepository;
+    private final OrderDetailRepository orderDetailRepository;
 
-//    @Autowired
-    PaymentRepository paymentRepository;
+    private final OrderHistoryRepository orderHistoryRepository;
 
-//    @Autowired
-    CustomerAddressRepository custAddRepository;
 
-//    @Autowired
-    BeanUtils beanUtils;
+    private final PaymentRepository paymentRepository;
 
-    ModelMapper modelMapper;
+    private final  CustomerAddressRepository custAddRepository;
 
-//    Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+    private final OrderConversionUtil orderConversionUtil;
+
+
 
     @Override
     public ResponseEntity<Object> postOrder(OrderDTO orderDTO) {
         Long now =System.currentTimeMillis();
         
         log.info("Posting Application ....");
+        Order order = convertOrderDtoToOrder(orderDTO, now);
+
+        try {
+            orderRepository.save(order);
+            log.info("{  Order Id: "+order.getOrder_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
+            return ResponseEntity.ok(order.getOrder_id());
+        }
+        catch (Exception e) {
+            log.info("{  Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+
+    }
+
+    private Order convertOrderDtoToOrder(OrderDTO orderDTO, Long now) {
         Order order = new Order();
 
-        CustomerDetail customerDetail= beanUtils.saveCustomerDetails(orderDTO);
-        List<OrderItem> orderItems = beanUtils.saveItem(orderDTO);
-        OrderHistory orderHistory=  beanUtils.populateOrderHistory(order,orderDTO,orderItems.get(0));
-        OrderAddressDetail orderAddressDetail= beanUtils.populateOrderAdressDetail(order,orderDTO);
+        CustomerDetail customerDetail= orderConversionUtil.populateCustomerDetail(orderDTO);
 
-        List<OrderDetail> orderDetail=  beanUtils.populateOrderDetail(orderDTO, order,orderItems);
-        PaymentDetails paymentDetails= beanUtils.populatePaymentDetails(order, orderDTO);
+        OrderHistory orderHistory =  orderConversionUtil.populateOrderHistory(orderDTO);
+        orderHistory.setOrder(order);
+
+        OrderAddressDetail orderAddressDetail= orderConversionUtil.populateOrderAddressDetail(orderDTO);
+        orderAddressDetail.setOrder(order);
+
+        List<OrderDetail> orderDetail=  orderConversionUtil.populateOrderDetail(orderDTO,order);
+        PaymentDetails paymentDetails= orderConversionUtil.populatePaymentDetails(order, orderDTO);
 
 
         // Populating Order
-        order.setOrderStatus(orderDTO.getOrderStatus());        
-            order.setOrderTotalAmount(orderDTO.getPaymentDetail().getTotalPrice());
+        order.setOrderStatus(orderDTO.getOrderStatus());
+        order.setOrderTotalAmount(orderDTO.getPaymentDetail().getTotalPrice());
         order.setOrderBaseAmount(orderDTO.getOrderTotal());
         order.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
         order.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
@@ -97,19 +105,7 @@ public class OrderServiceImpl implements OrderService{
         order.setOrderHistory(Arrays.asList(orderHistory));
         order.setDeliveryInstruction(orderDTO.getDeliveryInstruction());
         order.setCreateDate(new Timestamp(now));
-
-        Order order2 = modelMapper.map(orderDTO, Order.class);
-
-        try {
-            orderRepository.save(order);
-            log.info("{  Order Id: "+order.getOrder_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
-            return ResponseEntity.ok(order.getOrder_id());
-        }
-        catch (Exception e) {
-            log.info("{  Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-
+        return order;
     }
 
 
@@ -172,7 +168,7 @@ public class OrderServiceImpl implements OrderService{
 
         ArrayList orderList = orderRepository.findAllByCreatedByAndCreateDateBetween(createdBy, t1, t2);
 
-        ArrayList orderListResponse = beanUtils.populateOrderListDetail(orderList);
+        ArrayList orderListResponse = orderConversionUtil.populateOrderListDetail(orderList);
         if(orderListResponse.size()>0) {
             return ResponseEntity.ok(orderListResponse); //new ApiResponse<Order>(order,"SUCCESS",new Timestamp(System.currentTimeMillis()));
         }
