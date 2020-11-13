@@ -6,7 +6,7 @@ import java.util.List;
 public class OrderDTO {
 
     private String customerType;
-    @NotBlank(message = "Title is required")
+//    @NotBlank(message = "Title is required")
     CustomerDetailDTO customerDetailDTO;
     Double orderTotal;
     Integer orderStatus;

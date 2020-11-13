@@ -9,8 +9,8 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private int id;
+    @Column(name = "product_id")
+    private int product_id;
 
     @Column(name = "sku")
     private String sku;
@@ -35,9 +35,9 @@ public class Product {
 
     }
 
-    public Product(int id, String sku, String name, String long_name, String description, String tax_rate) {
+    public Product(int product_id, String sku, String name, String long_name, String description, String tax_rate) {
         super();
-        this.id = id;
+        this.product_id = product_id;
         this.sku = sku;
         this.name = name;
         this.long_name = long_name;
@@ -46,12 +46,12 @@ public class Product {
         //this.item = item;
     }
 
-    public int getId() {
-        return id;
+    public int getProduct_id() {
+        return product_id;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setProduct_id(int product_id) {
+        this.product_id = product_id;
     }
 
     public String getSku() {

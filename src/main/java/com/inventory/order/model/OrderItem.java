@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Table(name="item")
-public class OrderItem
+public class    OrderItem
 {
 
 
@@ -66,7 +66,7 @@ public class OrderItem
     List<OrderHistory> orderHistory;
 
     @JsonIgnoreProperties("product")
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @OneToOne
     @JoinColumn(name = "product_id", nullable = false)
     Product product;
 

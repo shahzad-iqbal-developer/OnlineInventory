@@ -192,7 +192,7 @@ public class OrderConversionUtil {
                 itemDetail.setPrice(orderDetail.getItem().getPrice());
                 itemDetail.setSku(orderDetail.getItem().getSku());
 
-                itemDetail.setProductId(orderDetail.getItem().getProduct().getId());
+                itemDetail.setProductId(orderDetail.getItem().getProduct().getProduct_id());
                 itemDetail.setProductName(orderDetail.getItem().getProduct().getName());
                 itemDetail.setProductLongName(orderDetail.getItem().getProduct().getLong_name());
                 itemDetail.setProdDescription(orderDetail.getItem().getProduct().getDescription());
