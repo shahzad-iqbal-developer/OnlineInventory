@@ -4,7 +4,7 @@ import com.inventory.order.model.*;
 import com.inventory.order.repository.CustomerDetailRepository;
 import com.inventory.order.repository.ItemRepository;
 import com.inventory.order.repository.OrderHistoryRepository;
-import lombok.RequiredArgsConstructor;
+//import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
  *
  */
 @Component
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class OrderConversionUtil {
-
-    private final ModelMapper mapper;
+    @Autowired
+    ModelMapper mapper;
 
     public OrderAddressDetail populateOrderAddressDetail(OrderDTO orderDTO) {
 

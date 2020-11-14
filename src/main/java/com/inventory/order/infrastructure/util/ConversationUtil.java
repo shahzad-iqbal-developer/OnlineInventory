@@ -1,6 +1,6 @@
 package com.inventory.order.infrastructure.util;
 
-import lombok.extern.slf4j.Slf4j;
+//import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
-@Slf4j
+//@Slf4j
 public class ConversationUtil {
 
     @Autowired
