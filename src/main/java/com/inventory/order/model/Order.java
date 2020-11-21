@@ -10,24 +10,24 @@ import java.util.List;
 @Entity
 @Table(name ="order")
 public class Order {
-	
 
-	@JsonIgnoreProperties("order")
+
+    @JsonIgnoreProperties("order")
     @OneToMany(mappedBy = "order",cascade = {CascadeType.ALL})
     List<OrderDetail> orderDetailList;
 
-	
-	@JsonIgnoreProperties({"order","item"})
+
+    @JsonIgnoreProperties({"order","item"})
     @OneToMany(mappedBy = "order",cascade = {CascadeType.ALL})
     List<OrderHistory> orderHistory;
 
 
-	@JsonIgnoreProperties("order")
+    @JsonIgnoreProperties("order")
     @OneToOne(mappedBy = "order",cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     OrderAddressDetail orderAddressDetails;
 //
-	
-	@JsonIgnoreProperties("order")
+
+    @JsonIgnoreProperties("order")
     @OneToMany(mappedBy = "order",cascade = {CascadeType.ALL}   )
     List<PaymentDetails> paymentDetails;
 
@@ -82,11 +82,16 @@ public class Order {
     @Column(name="delivery_instruction")
     private String deliveryInstruction;
 
+    @Column(name="tax")
+    private Double orderTax;
+
+
+
 
     public Order() {
     }
 
-    public Order(Long id, Integer orderStatus, Double orderTotalAmount, Double orderBaseAmount, Double discountAmount, Double shippingAmount, Integer userType, Integer paymentStatus, Integer discountType, String phone, String email, String discountCode, Integer busyFlag, String busyVoucherId, Integer notificationType, Integer shippingMethod, String shippingId, Integer createdBy, Timestamp createDate, Integer updatedBy, Timestamp lastUpdate, String deliveryInstruction) {
+    public Order(Long id, Integer orderStatus, Double orderTotalAmount, Double orderBaseAmount, Double discountAmount, Double shippingAmount, Integer userType, Integer paymentStatus, Integer discountType, String phone, String email, String discountCode, Integer busyFlag, String busyVoucherId, Integer notificationType, Integer shippingMethod, String shippingId, Integer createdBy, Timestamp createDate, Integer updatedBy, Timestamp lastUpdate, String deliveryInstruction, Double orderTax) {
 
         this.order_id = id;
         this.orderStatus = orderStatus;
@@ -110,6 +115,7 @@ public class Order {
         this.updatedBy = updatedBy;
         this.lastUpdate = lastUpdate;
         this.deliveryInstruction=deliveryInstruction;
+        this.orderTax = orderTax;
     }
 
     public List<OrderDetail> getOrderDetailList() {
@@ -319,4 +325,14 @@ public class Order {
     public void setDeliveryInstruction(String deliveryInstruction) {
         this.deliveryInstruction = deliveryInstruction;
     }
+
+    public Double getOrderTax() {
+        return orderTax;
+    }
+
+    public void setOrderTax(Double orderTax) {
+        this.orderTax = orderTax;
+    }
+
+
 }

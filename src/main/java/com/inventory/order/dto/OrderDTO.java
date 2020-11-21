@@ -10,6 +10,7 @@ public class OrderDTO {
     CustomerDetailDTO customerDetailDTO;
     Double orderTotal;
     Integer orderStatus;
+    Double orderTax;
     Integer paymentStatus;
     Long notificationId;
     Integer shippingMethod;
@@ -29,7 +30,7 @@ public class OrderDTO {
                     Double orderTotal, Integer orderStatus, Integer paymentStatus,
                     Long notificationId, Integer shippingMethod, Double shippingAmt,
                     List<ItemDTO> items, AddressDTO address, CouponDetailDTO couponDetail,
-                    PaymentDetailDTO paymentDetail, String deliveryInstruction) {
+                    PaymentDetailDTO paymentDetail, String deliveryInstruction, Double orderTax) {
 
         this.customerType = customerType;
         this.customerDetailDTO = customerDetailDTO;
@@ -44,6 +45,7 @@ public class OrderDTO {
         this.couponDetail = couponDetail;
         this.paymentDetail = paymentDetail;
         this.deliveryInstruction=deliveryInstruction;
+        this.orderTax=orderTax;
     }
 
     public String getCustomerType() {
@@ -148,5 +150,12 @@ public class OrderDTO {
 
     public void setDeliveryInstruction(String deliveryInstruction) {
         this.deliveryInstruction = deliveryInstruction;
+    }
+    public Double getOrderTax() {
+        return orderTax;
+    }
+
+    public void setOrderTax(Double orderTax) {
+        this.orderTax = orderTax;
     }
 }

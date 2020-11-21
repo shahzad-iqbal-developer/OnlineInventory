@@ -12,60 +12,62 @@ import java.util.List;
 
 public class OrderSearchResponse {
 
-    private Long order_id;
-    private int orderStatus;
-    private String orderStatusDesc;
+	private Long order_id;
+	private int orderStatus;
+	private String orderStatusDesc;
 	private Double orderTotalAmount;
-    private Double orderBaseAmount;
-    private Double discountAmount;
-    private Double shippingAmount;
-    private Integer userType;
-    private Integer paymentStatus;
-    private Integer discountType;
-    private String phone;
-    private String email;
-    private String discountCode;
-    private Integer busyFlag;
-    private String busyVoucherId;
-    private Integer notificationType;
-    private Integer shippingMethod;
-    private String shippingId;
-    private Integer createdBy;
-    private Timestamp createDate;
-    private Integer updatedBy;
-    private Timestamp lastUpdate;
-    
-    private String action;
-    private String deliveryDate;
-    private String orderDate;
+	private Double orderBaseAmount;
+	private Double discountAmount;
+	private Double shippingAmount;
+	private Integer userType;
+	private Integer paymentStatus;
+	private Integer discountType;
+	private String phone;
+	private String email;
+	private String discountCode;
+	private Integer busyFlag;
+	private String busyVoucherId;
+	private Integer notificationType;
+	private Integer shippingMethod;
+	private String shippingId;
+	private Integer createdBy;
+	private Timestamp createDate;
+	private Integer updatedBy;
+	private Timestamp lastUpdate;
+
+	private String action;
+	private String deliveryDate;
+	private String orderDate;
 
 	List<ItemDetails> itemDetailList;
-    OrderAddressDetail orderAddressDetails;
-    List<PaymentDetails> paymentDetails;
+	OrderAddressDetail orderAddressDetails;
+	List<PaymentDetails> paymentDetails;
 	public Long getOrder_id() {
 		return order_id;
 	}
 	public void setOrder_id(Long order_id) {
 		this.order_id = order_id;
 	}
-	
+
 	public int getOrderStatus() {
 		return orderStatus;
 	}
-	
+
 	public void setOrderStatus(int orderStatus) {
 		this.orderStatus = orderStatus;
 	}
-	
+
 	public String getOrderStatusDesc() {
 		HashMap<Integer, String> statusMap = new HashMap<Integer, String>();
-		
+
 		statusMap.put(1, "New");
 		statusMap.put(2, "In Progress");
 		statusMap.put(3, "Shipped");
 		statusMap.put(4, "Delivered");
 		statusMap.put(5, "Cancelled");
-		statusMap.put(6, "Returned");
+		statusMap.put(6, "Return Initiated");
+		statusMap.put(7, "Partial Returned");
+		statusMap.put(8, "Returned");
 		this.orderStatusDesc = statusMap.get(this.orderStatus);
 		return orderStatusDesc;
 	}
@@ -204,9 +206,9 @@ public class OrderSearchResponse {
 	public void setPaymentDetails(List<PaymentDetails> paymentDetails) {
 		this.paymentDetails = paymentDetails;
 	}
-	
-	public String getAction() { 
-		
+
+	public String getAction() {
+
 		if(this.orderStatus==3 || this.orderStatus==4)
 			return "Return";
 		else if(this.orderStatus==1 || this.orderStatus==2)
@@ -214,28 +216,28 @@ public class OrderSearchResponse {
 		else
 			return "-";
 	}
-	
-	public String getDeliDate() { 
-		
+
+	public String getDeliDate() {
+
 		Calendar calendar = Calendar.getInstance();
-	    calendar.setTime(this.createDate);
-	    calendar.add(Calendar.DAY_OF_MONTH, 7);
-	     
-	     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-	     this.deliveryDate = format.format(calendar.getTime());
-	    
+		calendar.setTime(this.createDate);
+		calendar.add(Calendar.DAY_OF_MONTH, 7);
+
+		SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+		this.deliveryDate = format.format(calendar.getTime());
+
 		return deliveryDate;
 	}
-	
-	public String getOrderDate() { 
-		
+
+	public String getOrderDate() {
+
 		Calendar calendar = Calendar.getInstance();
-	    calendar.setTime(this.createDate);
-	     
-	     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
-	     this.orderDate = format.format(calendar.getTime());
-	    
+		calendar.setTime(this.createDate);
+
+		SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");
+		this.orderDate = format.format(calendar.getTime());
+
 		return orderDate;
 	}
-    
+
 }

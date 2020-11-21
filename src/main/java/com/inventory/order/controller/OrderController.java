@@ -2,6 +2,7 @@ package com.inventory.order.controller;
 
 import com.inventory.order.dto.CustomerAddressDTO;
 import com.inventory.order.dto.OrderDTO;
+import com.inventory.order.dto.OrderReturnItemsDTO;
 import com.inventory.order.model.Order;
 import com.inventory.order.service.OrderService;
 import com.inventory.order.service.OrderServiceImpl;
@@ -70,5 +71,16 @@ public class OrderController {
     @GetMapping("/getCustAddress/{createdBy}")
     public ResponseEntity<Object> retrieveUser(@PathVariable int createdBy){
         return orderService.getCustomerAddress(createdBy);
+    }
+    @PutMapping("/cancelOrder/{orderId}")
+    public ResponseEntity<Object> cancelOrder(@PathVariable Long orderId){
+        // Order order = (Order)orderService.getOrderById(orderId);
+
+        return orderService.cancelOrderById(orderId);
+    }
+    @PutMapping("/returnOrder")
+    public ResponseEntity<Object> returnOrder(@RequestBody OrderReturnItemsDTO returnItemDTO){
+        System.out.println("inside return orders..");
+        return orderService.returnOrder(returnItemDTO);
     }
 }

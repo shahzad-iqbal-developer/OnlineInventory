@@ -1,6 +1,8 @@
 package com.inventory.order.service;
 
 import com.inventory.order.dto.CustomerAddressDTO;
+import com.inventory.order.dto.ItemDTO;
+import com.inventory.order.dto.OrderReturnItemsDTO;
 import com.inventory.order.repository.CustomerAddressRepository;
 import com.inventory.order.infrastructure.util.OrderConversionUtil;
 import com.inventory.order.dto.OrderDTO;
@@ -51,7 +53,7 @@ public class OrderServiceImpl implements OrderService{
     @Override
     public ResponseEntity<Object> postOrder(OrderDTO orderDTO) {
         Long now =System.currentTimeMillis();
-        
+
         log.info("Posting Application ....");
         Order order = convertOrderDtoToOrder(orderDTO, now);
 
@@ -86,6 +88,7 @@ public class OrderServiceImpl implements OrderService{
         order.setOrderStatus(orderDTO.getOrderStatus());
         order.setOrderTotalAmount(orderDTO.getPaymentDetail().getTotalPrice());
         order.setOrderBaseAmount(orderDTO.getOrderTotal());
+        order.setOrderTax(orderDTO.getOrderTax());
         order.setCreatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
         order.setUpdatedBy(orderDTO.getCustomerDetail().getCustomerId().intValue());
         order.setDiscountAmount(orderDTO.getCouponDetail().getDiscountAmt());
@@ -114,15 +117,15 @@ public class OrderServiceImpl implements OrderService{
 
 
     @Override
-	public ResponseEntity<Order> getOrderById(Long id) {
-		log.info("getting order by id"+id);
-		Optional<Order> order = orderRepository.findById(id);
-		if(order.isPresent()) {
-			return ResponseEntity.ok(order.get());
-		}
-		return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    public ResponseEntity<Order> getOrderById(Long id) {
+        log.info("getting order by id"+id);
+        Optional<Order> order = orderRepository.findById(id);
+        if(order.isPresent()) {
+            return ResponseEntity.ok(order.get());
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
 
-	}
+    }
 
 
     public ResponseEntity<Object> getOrderListID(int createdBy) {
@@ -234,6 +237,51 @@ public class OrderServiceImpl implements OrderService{
         }
     }
 
+    public ResponseEntity<Object> cancelOrderById(Long id) {
+        log.info("inside cancel order by id - "+id);
+        Optional<Order> order = orderRepository.findById(id);
+        if(order.isPresent()) {
+            Order newOrder = (Order)order.get();
+            newOrder.setOrderStatus(5);
+            orderRepository.save(newOrder);
+            return ResponseEntity.ok(newOrder.getOrder_id());
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
+    public ResponseEntity<Object> returnOrder(OrderReturnItemsDTO returnDTO) {
+        log.info("inside return order by id - "+returnDTO.getOrderId());
+        Optional<Order> order = orderRepository.findById(returnDTO.getOrderId());
+        if(order.isPresent()) {
+            Order newOrder = (Order)order.get();
 
+            List <OrderDetail> items =newOrder.getOrderDetailList();
+            int totalItems = items.size();
+            System.out.println("total items: "+totalItems);
+            int returnedItem = 0;
+            for(int i=0; i<totalItems;i++) {
+                if(newOrder.getOrderDetailList().get(i).getItemStatus()==6 ||
+                        newOrder.getOrderDetailList().get(i).getItemStatus()==8){
+                    returnedItem=returnedItem+1;
+                }else {
+                    for(ItemDTO item: returnDTO.getItemLists()) {
+                        if(newOrder.getOrderDetailList().get(i).getItem().getId()==item.getItemId()) {
+                            newOrder.getOrderDetailList().get(i).setItemStatus(6);
+                            break;
+                        }
+                    }
+                }
 
+            }
+
+            if(totalItems > (returnedItem + returnDTO.getItemLists().size())){
+                newOrder.setOrderStatus(7);
+            }else {
+                newOrder.setOrderStatus(8);
+            }
+
+            orderRepository.save(newOrder);
+            return ResponseEntity.ok(newOrder.getOrder_id());
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+    }
 }

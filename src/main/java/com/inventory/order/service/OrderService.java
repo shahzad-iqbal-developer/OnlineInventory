@@ -2,6 +2,7 @@ package com.inventory.order.service;
 
 import com.inventory.order.dto.CustomerAddressDTO;
 import com.inventory.order.dto.OrderDTO;
+import com.inventory.order.dto.OrderReturnItemsDTO;
 import com.inventory.order.model.Order;
 import org.springframework.http.ResponseEntity;
 
@@ -22,5 +23,8 @@ public interface OrderService {
     ResponseEntity<Object> postCustomerAddress(CustomerAddressDTO custAddDTO);
 
     ResponseEntity<Object> getCustomerAddress(int createdBy);
+
+    ResponseEntity<Object> cancelOrderById(Long id);
+    ResponseEntity<Object> returnOrder(OrderReturnItemsDTO returnDTO);
 
 }
