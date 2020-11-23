@@ -3,6 +3,8 @@ package com.inventory.order.service;
 import com.inventory.order.dto.CustomerAddressDTO;
 import com.inventory.order.dto.ItemDTO;
 import com.inventory.order.dto.OrderReturnItemsDTO;
+import com.inventory.order.infrastructure.common.Constants;
+import com.inventory.order.infrastructure.exception.OnlineInventoryException;
 import com.inventory.order.repository.CustomerAddressRepository;
 import com.inventory.order.infrastructure.util.OrderConversionUtil;
 import com.inventory.order.dto.OrderDTO;
@@ -65,6 +67,7 @@ public class OrderServiceImpl implements OrderService{
         catch (Exception e) {
             log.info("{  Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+
         }
 
     }
@@ -117,14 +120,10 @@ public class OrderServiceImpl implements OrderService{
 
 
     @Override
-    public ResponseEntity<Order> getOrderById(Long id) {
-        log.info("getting order by id"+id);
-        Optional<Order> order = orderRepository.findById(id);
-        if(order.isPresent()) {
-            return ResponseEntity.ok(order.get());
-        }
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-
+    public Order getOrderById(Long id) {
+        log.info("getting order by id "+id);
+         return orderRepository.findById(id)
+                .orElseThrow(() -> new OnlineInventoryException(HttpStatus.NOT_FOUND, Constants.ORDER_NOT_FOUND.getValue()));
     }
 
 

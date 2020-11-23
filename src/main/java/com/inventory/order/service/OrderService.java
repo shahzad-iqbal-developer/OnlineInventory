@@ -12,7 +12,7 @@ public interface OrderService {
 
     ResponseEntity<Object> postOrder(OrderDTO orderDTO);
 
-    ResponseEntity<Order> getOrderById(Long id);
+    Order getOrderById(Long id);
 
     ResponseEntity<Object> getOrderListID(int createdBy);
 
