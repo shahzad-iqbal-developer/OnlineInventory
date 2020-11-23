@@ -79,7 +79,7 @@ public class OrderController {
         try{
             return orderService.getCustomerAddress(createdBy);
         } catch (OnlineInventoryException ex){
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, ex.getMessage());
         }catch(Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.SOMETHING_BAD_HAPPENED.getValue());
         }
