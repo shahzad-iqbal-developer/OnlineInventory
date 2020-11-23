@@ -120,10 +120,14 @@ public class OrderServiceImpl implements OrderService{
 
 
     @Override
-    public Order getOrderById(Long id) {
-        log.info("getting order by id "+id);
-         return orderRepository.findById(id)
-                .orElseThrow(() -> new OnlineInventoryException(HttpStatus.NOT_FOUND, Constants.ORDER_NOT_FOUND.getValue()));
+    public ResponseEntity<Object> getOrderById(Long id) {
+        log.info("getting order by id"+id);
+        Optional<Order> order = orderRepository.findById(id);
+        if(order.isPresent()) {
+            return ResponseEntity.ok(order.get());
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
+
     }
 
 
@@ -222,18 +226,10 @@ public class OrderServiceImpl implements OrderService{
         }
     }
 
-    public ResponseEntity<Object> getCustomerAddress(int createdBy) {
+    public List<CustomerAddress> getCustomerAddress(int createdBy) {
         log.info("getting addresses by id - "+createdBy);
-        try {
-            List addList = custAddRepository.findAllByCreatedBy(createdBy);
-            if(addList.size()>0) {
-                return ResponseEntity.ok(addList);
-            }
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-        }catch(Exception e) {
-            log.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return custAddRepository.findAllByCreatedBy(createdBy).orElseThrow(
+                () -> new OnlineInventoryException(Constants.CUSTOMER_NOT_FOUND.getValue()));
     }
 
     public ResponseEntity<Object> cancelOrderById(Long id) {

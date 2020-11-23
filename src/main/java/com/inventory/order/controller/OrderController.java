@@ -3,15 +3,21 @@ package com.inventory.order.controller;
 import com.inventory.order.dto.CustomerAddressDTO;
 import com.inventory.order.dto.OrderDTO;
 import com.inventory.order.dto.OrderReturnItemsDTO;
+import com.inventory.order.infrastructure.common.Constants;
+import com.inventory.order.infrastructure.exception.OnlineInventoryException;
+import com.inventory.order.model.CustomerAddress;
 import com.inventory.order.model.Order;
 import com.inventory.order.service.OrderService;
 import com.inventory.order.service.OrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -28,8 +34,8 @@ public class OrderController {
     }
     
     @GetMapping("/{id}")
-    public ResponseEntity<Order> getOrderByID(@PathVariable("id") Long id){    	
-    	return ResponseEntity.ok(orderService.getOrderById(id));
+    public ResponseEntity<Object> getOrderByID(@PathVariable("id") Long id){
+    	return orderService.getOrderById(id);
     }
 
 
@@ -69,8 +75,14 @@ public class OrderController {
     }
 
     @GetMapping("/getCustAddress/{createdBy}")
-    public ResponseEntity<Object> retrieveUser(@PathVariable int createdBy){
-        return orderService.getCustomerAddress(createdBy);
+    public List<CustomerAddress> retrieveUser(@PathVariable int createdBy){
+        try{
+            return orderService.getCustomerAddress(createdBy);
+        } catch (OnlineInventoryException ex){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.SOMETHING_BAD_HAPPENED.getValue());
+        }
     }
     @PutMapping("/cancelOrder/{orderId}")
     public ResponseEntity<Object> cancelOrder(@PathVariable Long orderId){
