@@ -3,6 +3,8 @@ package com.inventory.order.service;
 import com.inventory.order.dto.CustomerAddressDTO;
 import com.inventory.order.dto.ItemDTO;
 import com.inventory.order.dto.OrderReturnItemsDTO;
+import com.inventory.order.infrastructure.common.Constants;
+import com.inventory.order.infrastructure.exception.OnlineInventoryException;
 import com.inventory.order.repository.CustomerAddressRepository;
 import com.inventory.order.infrastructure.util.OrderConversionUtil;
 import com.inventory.order.dto.OrderDTO;
@@ -65,6 +67,7 @@ public class OrderServiceImpl implements OrderService{
         catch (Exception e) {
             log.info("{  Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+
         }
 
     }
@@ -117,7 +120,7 @@ public class OrderServiceImpl implements OrderService{
 
 
     @Override
-    public ResponseEntity<Order> getOrderById(Long id) {
+    public ResponseEntity<Object> getOrderById(Long id) {
         log.info("getting order by id"+id);
         Optional<Order> order = orderRepository.findById(id);
         if(order.isPresent()) {
@@ -184,10 +187,25 @@ public class OrderServiceImpl implements OrderService{
     }
 
 
-    public ResponseEntity<Object> postCustomerAddress(CustomerAddressDTO custAddDTO){
-        Long now =System.currentTimeMillis();
+    public Long postCustomerAddress(CustomerAddressDTO custAddDTO){
         Logger logger = LoggerFactory.getLogger(OrderService.class);
         logger.info("Posting Application ....");
+        CustomerAddress custAdd = getCustomerAddress(custAddDTO);
+        try {
+            custAddRepository.save(custAdd);
+            logger.info("{Id: "+custAdd.getAddress_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
+            return custAdd.getAddress_id();
+        }
+        catch (Exception e) {
+            logger.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            throw new OnlineInventoryException(Constants.CUSTOMER_EXISTS.getValue());
+        }
+    }
+
+
+    private CustomerAddress getCustomerAddress(CustomerAddressDTO custAddDTO) {
+        Long now = System.currentTimeMillis();
         CustomerAddress custAdd = new CustomerAddress();
 
         custAdd.setAddressLine1(custAddDTO.getAddressLine1());
@@ -209,32 +227,13 @@ public class OrderServiceImpl implements OrderService{
         custAdd.setZipCode(custAddDTO.getZipCode());
         custAdd.setCreatedBy(custAddDTO.getCreatedBy());
         custAdd.setCreatedDate(new Timestamp(now));
-
-        try
-        {
-            custAddRepository.save(custAdd);
-            logger.info("{Id: "+custAdd.getAddress_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
-            return ResponseEntity.ok(custAdd.getAddress_id());
-        }
-        catch (Exception e)
-        {
-            logger.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return custAdd;
     }
 
-    public ResponseEntity<Object> getCustomerAddress(int createdBy) {
+    public List<CustomerAddress> getCustomerAddress(int createdBy) {
         log.info("getting addresses by id - "+createdBy);
-        try {
-            List addList = custAddRepository.findAllByCreatedBy(createdBy);
-            if(addList.size()>0) {
-                return ResponseEntity.ok(addList);
-            }
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body(null);
-        }catch(Exception e) {
-            log.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return custAddRepository.findAllByCreatedBy(createdBy).orElseThrow(
+                () -> new OnlineInventoryException(Constants.CUSTOMER_NOT_FOUND.getValue()));
     }
 
     public ResponseEntity<Object> cancelOrderById(Long id) {
