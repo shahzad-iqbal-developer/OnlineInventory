@@ -71,7 +71,13 @@ public class OrderController {
     @PostMapping("/saveAddress")
     public Long saveAddress(@RequestBody CustomerAddressDTO custAddDTO){
         System.out.println("inside save address..");
-        return orderService.postCustomerAddress(custAddDTO);
+        try{
+            return orderService.postCustomerAddress(custAddDTO);
+        } catch (OnlineInventoryException ex){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
+        }catch(Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, Constants.SOMETHING_BAD_HAPPENED.getValue());
+        }
     }
 
     @GetMapping("/getCustAddress/{createdBy}")
