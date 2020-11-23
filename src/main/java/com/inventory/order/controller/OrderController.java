@@ -69,7 +69,7 @@ public class OrderController {
 
 
     @PostMapping("/saveAddress")
-    public ResponseEntity<Object> saveAddress(@RequestBody CustomerAddressDTO custAddDTO){
+    public Long saveAddress(@RequestBody CustomerAddressDTO custAddDTO){
         System.out.println("inside save address..");
         return orderService.postCustomerAddress(custAddDTO);
     }

@@ -22,7 +22,7 @@ public interface OrderService {
 
     ResponseEntity<Object> getOrderList(int createdBy, Date startDate, Date endDate);
 
-    ResponseEntity<Object> postCustomerAddress(CustomerAddressDTO custAddDTO);
+    Long postCustomerAddress(CustomerAddressDTO custAddDTO);
 
     List<CustomerAddress> getCustomerAddress(int createdBy);
 

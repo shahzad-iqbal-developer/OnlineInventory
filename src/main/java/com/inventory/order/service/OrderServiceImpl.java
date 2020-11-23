@@ -187,10 +187,25 @@ public class OrderServiceImpl implements OrderService{
     }
 
 
-    public ResponseEntity<Object> postCustomerAddress(CustomerAddressDTO custAddDTO){
-        Long now =System.currentTimeMillis();
+    public Long postCustomerAddress(CustomerAddressDTO custAddDTO){
         Logger logger = LoggerFactory.getLogger(OrderService.class);
         logger.info("Posting Application ....");
+        CustomerAddress custAdd = getCustomerAddress(custAddDTO);
+        try {
+            custAddRepository.save(custAdd);
+            logger.info("{Id: "+custAdd.getAddress_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
+            return custAdd.getAddress_id();
+        }
+        catch (Exception e) {
+            logger.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            throw new OnlineInventoryException(Constants.CUSTOMER_EXISTS.getValue());
+        }
+    }
+
+
+    private CustomerAddress getCustomerAddress(CustomerAddressDTO custAddDTO) {
+        Long now = System.currentTimeMillis();
         CustomerAddress custAdd = new CustomerAddress();
 
         custAdd.setAddressLine1(custAddDTO.getAddressLine1());
@@ -212,18 +227,7 @@ public class OrderServiceImpl implements OrderService{
         custAdd.setZipCode(custAddDTO.getZipCode());
         custAdd.setCreatedBy(custAddDTO.getCreatedBy());
         custAdd.setCreatedDate(new Timestamp(now));
-
-        try
-        {
-            custAddRepository.save(custAdd);
-            logger.info("{Id: "+custAdd.getAddress_id().toString()+"  "+ "Status: SUCCESS"+"Timestamp: "+new Timestamp(System.currentTimeMillis())+"  }");
-            return ResponseEntity.ok(custAdd.getAddress_id());
-        }
-        catch (Exception e)
-        {
-            logger.info("{Timestamp:  "+new Timestamp( System.currentTimeMillis())+"  Status = Failed"+"  message="+e.getMessage()+"  }");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
+        return custAdd;
     }
 
     public List<CustomerAddress> getCustomerAddress(int createdBy) {
